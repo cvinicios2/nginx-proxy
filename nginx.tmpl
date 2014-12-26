@@ -85,7 +85,14 @@ upstream {{ $host }} {
 
 server {
 	server_name {{ $host }};
-	rewrite ^(.*) https://{{ $host }}$1 permanent;
+	#rewrite ^(.*) https://{{ $host }}$1 permanent;
+        location / {
+                proxy_pass http://{{ $host }};
+                {{ if (exists (printf "/etc/nginx/htpasswd/%s" $host)) }}
+                auth_basic      "Restricted {{ $host }}";
+                auth_basic_user_file    {{ (printf "/etc/nginx/htpasswd/%s" $host) }};
+                {{ end }}
+        }
 }
 
 server {
